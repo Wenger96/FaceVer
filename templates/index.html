@@ -14,55 +14,12 @@
         </div>
 
         <div class="cards-grid">
-            <!-- Registration Card -->
-            <div class="card">
-                <div class="card-header">
-                    <h2>
-                        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
-                        </svg>
-                        Register New Person
-                    </h2>
-                    <p>Add a new individual to the face recognition database</p>
-                </div>
-                <div class="card-body">
-                    <form action="/register/" method="post" enctype="multipart/form-data">
-                        <div class="form-group">
-                            <label for="name" class="form-label">Full Name</label>
-                            <input type="text" id="name" name="name" class="form-input" placeholder="Enter full name" required>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="register-file" class="form-label">Profile Image</label>
-                            <input type="file" id="register-file" name="file" class="form-input file-input" accept="image/*" required>
-                            <small class="form-hint">
-                                Supported formats: JPG, PNG, GIF (Max 5MB)
-                            </small>
-                        </div>
-                        
-                        <button type="submit" class="btn btn-primary btn-full">
-                            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                            </svg>
-                            Register Person
-                        </button>
-                    </form>
-                    
-                    {% if register_result %}
-                        <div class="result-message result-success">
-                            <strong>✅ Success:</strong> {{ register_result }}
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
 
             <!-- Comparison Card -->
             <div class="card">
                 <div class="card-header">
                     <h2>
-                        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
+
                         Face Comparison
                     </h2>
                     <p>Verify identity by comparing faces</p>
@@ -104,6 +61,13 @@
                             <strong>📊 Result:</strong> {{ compare_result }}
                         </div>
                     {% endif %}
+
+                    {% if image1 and image2 %}
+                    <div class="comparison-result">
+                        <img src="/static/{{ image1 }}" alt="First Image">
+                        <img src="/static/{{ image2 }}" alt="Second Image">
+                    </div>
+                {% endif %}
                 </div>
             </div>
         </div>
@@ -132,10 +96,8 @@
                 button.disabled = true;
                 button.classList.add('loading');
                 
-                // Store original text
                 const originalText = button.innerHTML;
                 
-                // Update button text
                 button.innerHTML = `
                     <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
@@ -145,7 +107,6 @@
                     Processing...
                 `;
                 
-                // Re-enable after a delay (you can remove this in production)
                 setTimeout(() => {
                     button.disabled = false;
                     button.classList.remove('loading');
