@@ -9,66 +9,87 @@
 <body>
     <div class="main-container">
         <div class="header">
-            <h1> Audit Tools Face Verification System</h1>
-            <p>Secure biometric authentication and identity management</p>
+            <h1>🔐 Audit Tools Face Verification System</h1>
+            <p>Secure biometric authentication and identity management with advanced AI technology</p>
         </div>
 
-        <div class="cards-grid">
-
-            <!-- Comparison Card -->
-            <div class="card">
-                <div class="card-header">
-                    <h2>
-
-                        Face Comparison
-                    </h2>
-                    <p>Verify identity by comparing faces</p>
-                </div>
-                <div class="card-body">
-                    <form action="/compare/" method="post" enctype="multipart/form-data" id="compareForm">
-                        <div class="form-group">
-                            <label for="mode" class="form-label">Comparison Mode</label>
-                            <select name="mode" id="mode" class="form-input form-select" required>
-                                <option value="">Select comparison mode...</option>
-                                <option value="db">🗃️ Compare with Database</option>
-                                <option value="upload">📷 Compare Two Images</option>
-                            </select>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="file1" class="form-label">First Image</label>
-                            <input type="file" id="file1" name="file1" class="form-input file-input" accept="image/*" required>
-                        </div>
-                        
-                        <div class="form-group conditional-field" id="secondImageGroup">
-                            <label for="file2" class="form-label">Second Image</label>
-                            <input type="file" id="file2" name="file2" class="form-input file-input" accept="image/*">
-                            <small class="form-hint">
-                                Required only for two-image comparison mode
-                            </small>
-                        </div>
-                        
-                        <button type="submit" class="btn btn-primary btn-full">
-                            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="card">
+            <div class="card-header">
+                <h2>
+                    Face Comparison
+                </h2>
+                <p>Verify identity by comparing facial features with advanced biometric analysis</p>
+            </div>
+            <div class="card-body">
+                <form action="/compare/" method="post" enctype="multipart/form-data" id="compareForm">
+                    <div class="form-group">
+                        <label for="mode" class="form-label">Comparison Mode</label>
+                        <select name="mode" id="mode" class="form-input form-select" required>
+                            <option value="">Select comparison mode...</option>
+                            <option value="db">🗃️ Compare with Database</option>
+                            <option value="upload">📷 Compare Two Images</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="file1" class="form-label">First Image</label>
+                        <input type="file" id="file1" name="file1" class="file-input" accept="image/*" required>
+                    </div>
+                    
+                    <div class="form-group conditional-field" id="secondImageGroup">
+                        <label for="file2" class="form-label">Second Image</label>
+                        <input type="file" id="file2" name="file2" class="file-input" accept="image/*">
+                        <small class="form-hint">
+                            Required only for two-image comparison mode
+                        </small>
+                    </div>
+                    
+                    <!-- ✅ Button group for Compare + Refresh -->
+                    <div class="button-group">
+                        <button type="submit" class="btn btn-primary">
+                            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
                             </svg>
                             Compare Faces
                         </button>
-                    </form>
-                    
-                    {% if compare_result %}
-                        <div class="result-message result-success">
-                            <strong>📊 Result:</strong> {{ compare_result }}
-                        </div>
-                    {% endif %}
 
-                    {% if image1 and image2 %}
-                    <div class="comparison-result">
-                        <img src="/static/{{ image1 }}" alt="First Image">
-                        <img src="/static/{{ image2 }}" alt="Second Image">
+                        <button type="button" class="btn btn-primary" onclick="window.location.reload();">
+                            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581
+                                m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                            </svg>
+                            Refresh
+                        </button>
+                    </div>
+                </form>
+                
+                {% if compare_result %}
+                    <div class="result-message result-success">
+                        <strong>🔊 Result:</strong> {{ compare_result }}
                     </div>
                 {% endif %}
+
+                {% if img1_url and img2_url %}
+                <div class="comparison-result">
+                    <div class="comparison-header">Comparison Results</div>
+                    <div class="comparison-images">
+                        <div class="image-container">
+                            <img src="{{ img1_url }}" alt="First Image">
+                            <div class="image-label">Uploaded Image</div>
+                        </div>
+                        <div class="image-container">
+                            <img src="{{ img2_url }}" alt="Second Image">
+                            <div class="image-label">{% if compare_result and 'Match found' in compare_result %}Database Match{% else %}Comparison Image{% endif %}</div>
+                        </div>
+                    </div>
+                    <!-- ✅ Score display -->
+                    {% if compare_result %}
+                    <div class="comparison-score">
+                        <strong>Confidence Score:</strong> {{ compare_result.split('score:')[-1].strip(' )') }}
+                    </div>
+                    {% endif %}
                 </div>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -87,32 +108,6 @@
                 secondImageInput.required = false;
                 secondImageInput.value = '';
             }
-        });
-
-        // Add loading states to forms
-        document.querySelectorAll('form').forEach(form => {
-            form.addEventListener('submit', function(e) {
-                const button = this.querySelector('button[type="submit"]');
-                button.disabled = true;
-                button.classList.add('loading');
-                
-                const originalText = button.innerHTML;
-                
-                button.innerHTML = `
-                    <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
-                            <animateTransform attributeName="transform" attributeType="XML" type="rotate" from="0 12 12" to="360 12 12" dur="1s" repeatCount="indefinite"/>
-                        </path>
-                    </svg>
-                    Processing...
-                `;
-                
-                setTimeout(() => {
-                    button.disabled = false;
-                    button.classList.remove('loading');
-                    button.innerHTML = originalText;
-                }, 3000);
-            });
         });
     </script>
 </body>
