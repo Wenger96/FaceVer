@@ -4,111 +4,153 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Face Verification System</title>
-    <link rel="stylesheet" href="../static/app.css">
+    <link rel="stylesheet" href="/static/app.css">
+
+    <style>
+        .conditional-field { display: none; }
+        .conditional-field.show { display: block; }
+        .comparison-result { margin-top: 20px; display: flex; flex-direction: column; gap: 10px; }
+        .comparison-images { display: flex; gap: 20px; }
+        .image-container { position: relative; text-align: center; }
+        .image-container img { max-width: 250px; border: 1px solid #ccc; border-radius: 8px; }
+        .image-label { margin-top: 5px; font-weight: bold; }
+        .comparison-score { margin-top: 10px; font-size: 1.1em; }
+        .result-error { margin-top: 10px; padding: 10px; background: #ffe5e5; border: 1px solid #ff9999; border-radius: 6px; color: #990000; font-weight: bold; }
+        .result-success { margin-top: 20px; padding: 12px; background: #e6ffea; border: 1px solid #99cc99; border-radius: 6px; color: #006600; font-weight: bold; }
+        .retry-hint { margin-top: 5px; font-size: 0.9em; color: #555; }
+        .image-error {
+            position: absolute;
+            top: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 0, 0, 0.8);
+            color: white;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 0.9em;
+            max-width: 90%;
+        }
+    </style>
 </head>
 <body>
-    <div class="main-container">
-        <div class="header">
-            <h1>🔐 Audit Tools Face Verification System</h1>
-            <p>Secure biometric authentication and identity management with advanced AI technology</p>
+<div class="main-container">
+    <div class="header">
+        <h1>Audit Tools Face Verification System</h1>
+        <p>Secure biometric authentication and identity management with advanced AI technology</p>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h2>Face Comparison</h2>
+            <p>Verify identity by comparing facial features with advanced biometric analysis</p>
         </div>
+        <div class="card-body">
+            <form action="/compare/" method="post" enctype="multipart/form-data" id="compareForm">
+                <div class="form-group">
+                    <label for="mode" class="form-label">Comparison Mode</label>
+                    <select name="mode" id="mode" class="form-input form-select" required>
+                        <option value="">Select comparison mode...</option>
+                        <option value="db" {% if mode == "db" %}selected{% endif %}>Compare with Database</option>
+                        <option value="upload" {% if mode == "upload" %}selected{% endif %}>Compare Two Images</option>
+                    </select>
+                </div>
 
-        <div class="card">
-            <div class="card-header">
-                <h2>
-                    Face Comparison
-                </h2>
-                <p>Verify identity by comparing facial features with advanced biometric analysis</p>
-            </div>
-            <div class="card-body">
-                <form action="/compare/" method="post" enctype="multipart/form-data" id="compareForm">
-                    <div class="form-group">
-                        <label for="mode" class="form-label">Comparison Mode</label>
-                        <select name="mode" id="mode" class="form-input form-select" required>
-                            <option value="">Select comparison mode...</option>
-                            <option value="db">🗃️ Compare with Database</option>
-                            <option value="upload">📷 Compare Two Images</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="file1" class="form-label">First Image</label>
-                        <input type="file" id="file1" name="file1" class="file-input" accept="image/*" required>
-                    </div>
-                    
-                    <div class="form-group conditional-field" id="secondImageGroup">
-                        <label for="file2" class="form-label">Second Image</label>
-                        <input type="file" id="file2" name="file2" class="file-input" accept="image/*">
-                        <small class="form-hint">
-                            Required only for two-image comparison mode
-                        </small>
-                    </div>
-                    
-                    <!-- ✅ Button group for Compare + Refresh -->
-                    <div class="button-group">
-                        <button type="submit" class="btn btn-primary">
-                            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
-                            </svg>
-                            Compare Faces
-                        </button>
+                <!-- First Image -->
+                <div class="form-group">
+                    <label for="file1" class="form-label">First Image</label>
+                    <input type="file" id="file1" name="file1" class="file-input" accept="image/*" required>
+                </div>
 
-                        <button type="button" class="btn btn-primary" onclick="window.location.reload();">
-                            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581
-                                m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                            </svg>
-                            Refresh
-                        </button>
-                    </div>
-                </form>
-                
-                {% if compare_result %}
-                    <div class="result-message result-success">
-                        <strong>🔊 Result:</strong> {{ compare_result }}
-                    </div>
-                {% endif %}
+                <!-- Second Image (conditional) -->
+                <div class="form-group conditional-field {% if mode == 'upload' %}show{% endif %}" id="secondImageGroup">
+                    <label for="file2" class="form-label">Second Image</label>
+                    <input type="file" id="file2" name="file2" class="file-input" accept="image/*" {% if mode == 'upload' %}required{% endif %}>
+                    <small>Required only for two-image comparison mode</small>
+                </div>
 
-                {% if img1_url and img2_url %}
-                <div class="comparison-result">
-                    <div class="comparison-header">Comparison Results</div>
-                    <div class="comparison-images">
-                        <div class="image-container">
-                            <img src="{{ img1_url }}" alt="First Image">
-                            <div class="image-label">Uploaded Image</div>
+                <!-- Buttons -->
+                <div class="button-group">
+                    <button type="submit" class="btn btn-primary">Compare Faces</button>
+                    <button type="button" class="btn btn-primary" id="refreshBtn">Refresh</button>
+                </div>
+            </form>
+
+            <!-- Results -->
+            {% if compare_result %}
+                <div class="result-message result-success">
+                    <strong>Result:</strong> {{ compare_result }}
+                </div>
+            {% endif %}
+
+            {% if img1_url or img2_url %}
+            <div class="comparison-result">
+                <div class="comparison-header">Comparison Results</div>
+                <div class="comparison-images">
+                    {% if img1_url %}
+                    <div class="image-container">
+                        <img src="{{ img1_url }}" alt="First Image">
+                        <div class="image-label">Uploaded Image</div>
+                        {% if error_file1 %}
+                        <div class="image-error">⚠ No face detected, kindly upload again</div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+
+                    {% if img2_url %}
+                    <div class="image-container">
+                        <img src="{{ img2_url }}" alt="Second Image">
+                        <div class="image-label">
+                            {% if compare_result and 'Match' in compare_result %}
+                                Database Match
+                            {% else %}
+                                Comparison Image
+                            {% endif %}
                         </div>
-                        <div class="image-container">
-                            <img src="{{ img2_url }}" alt="Second Image">
-                            <div class="image-label">{% if compare_result and 'Match found' in compare_result %}Database Match{% else %}Comparison Image{% endif %}</div>
-                        </div>
-                    </div>
-                    <!-- ✅ Score display -->
-                    {% if compare_result %}
-                    <div class="comparison-score">
-                        <strong>Confidence Score:</strong> {{ compare_result.split('score:')[-1].strip(' )') }}
+                        {% if error_file2 %}
+                        <div class="image-error">⚠ No face detected, kindly upload again</div>
+                        {% endif %}
                     </div>
                     {% endif %}
                 </div>
+                {% if score %}
+                <div class="comparison-score">
+                    <strong>Confidence Score:</strong> {{ score }}
+                </div>
                 {% endif %}
             </div>
+            {% endif %}
         </div>
     </div>
+</div>
 
-    <script>
-        // Handle conditional display of second image field
-        document.getElementById('mode').addEventListener('change', function() {
-            const secondImageGroup = document.getElementById('secondImageGroup');
-            const secondImageInput = document.getElementById('file2');
-            
-            if (this.value === 'upload') {
-                secondImageGroup.classList.add('show');
-                secondImageInput.required = true;
-            } else {
-                secondImageGroup.classList.remove('show');
-                secondImageInput.required = false;
-                secondImageInput.value = '';
-            }
-        });
-    </script>
+<script>
+    const modeSelect = document.getElementById('mode');
+    const secondImageGroup = document.getElementById('secondImageGroup');
+    const secondImageInput = document.getElementById('file2');
+    const compareForm = document.getElementById('compareForm');
+    const refreshBtn = document.getElementById('refreshBtn');
+
+    // Conditional display of second image
+    modeSelect.addEventListener('change', function() {
+        if (this.value === 'upload') {
+            secondImageGroup.classList.add('show');
+            secondImageInput.required = true;
+        } else {
+            secondImageGroup.classList.remove('show');
+            secondImageInput.required = false;
+            secondImageInput.value = '';
+        }
+    });
+
+    // Improved refresh button
+    refreshBtn.addEventListener('click', () => {
+        compareForm.reset();
+        secondImageGroup.classList.remove('show');
+
+        // Remove displayed results
+        document.querySelectorAll('.result-message, .comparison-result, .result-error, .image-error').forEach(el => el.remove());
+    });
+</script>
 </body>
 </html>

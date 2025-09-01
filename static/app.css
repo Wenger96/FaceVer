@@ -24,6 +24,7 @@
     --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.4),
                  0 4px 6px -4px rgb(0 0 0 / 0.3);
     --shadow-green: 0 0 20px rgba(5, 150, 105, 0.3);
+    --shadow-red: 0 0 20px rgba(220, 38, 38, 0.3);
     --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
@@ -130,12 +131,14 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
+    max-width: 260px;
 }
 .image-container img {
     width: 250px;
     height: auto;
     border-radius: 10px;
     box-shadow: 0px 2px 6px rgba(0,0,0,0.3);
+    border: 2px solid transparent;
 }
 .image-label {
     margin-top: 8px;
@@ -154,10 +157,30 @@ body {
 .result-success {
     background: rgba(16, 185, 129, 0.15);
     color: #10b981;
+    box-shadow: var(--shadow-green);
 }
 .result-error {
     background: rgba(220, 38, 38, 0.15);
     color: #f87171;
+    box-shadow: var(--shadow-red);
+    animation: pulseError 1.5s infinite;
+}
+
+/* 🔴 Highlight failed image */
+.image-container.error img {
+    border: 2px solid #dc2626;
+    box-shadow: var(--shadow-red);
+}
+.image-container.error .image-label {
+    color: #f87171;
+    font-weight: bold;
+}
+
+/* Error animation */
+@keyframes pulseError {
+    0% { box-shadow: 0 0 0 rgba(220, 38, 38, 0.4); }
+    50% { box-shadow: 0 0 20px rgba(220, 38, 38, 0.8); }
+    100% { box-shadow: 0 0 0 rgba(220, 38, 38, 0.4); }
 }
 
 /* Responsive */
